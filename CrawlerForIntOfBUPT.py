@@ -3,6 +3,7 @@ import re
 import requests
 import sys
 import time
+from pywebpush import webpush, WebPushException
 
 def handleRequests(session, url, method = 'GET', data = None):
     from config import proxies
@@ -55,6 +56,7 @@ def check(session, userInfo):
         print('状态获取异常，请联系作者，出bug啦...')
         return
     print('当前状态：' + t.group(1) + '.')
+    notify('当前状态：' + t.group(1) + '.')
     return t.group(1)
 
 def focus(userInfo):
@@ -62,8 +64,33 @@ def focus(userInfo):
     userInfo['btnLogin'] = '登录'
     with requests.Session() as session:
         login(session, userInfo)
-        while '在审' == check(session, userInfo):
-            time.sleep(1)
+        while '在审' != check(session, userInfo):
+            time.sleep(10)
+
+def notify(message):
+    f = open('./push.id', 'r')
+    for post in f.readlines():
+        data = dict()
+        params = post.split('&')
+        for p in params:
+            kv = p.split('=')
+            data[kv[0]] = kv[1]
+        push(message, data)
+    f.close()
+
+def push(message, param):
+    try:
+        webpush(
+            subscription_info={
+                "endpoint": param["endpoint"],
+                "keys": {
+                    "p256dh": param["p256dh"],
+                    "auth": param["auth"]
+                }},
+            data=message
+        )
+    except WebPushException as ex:
+        print("I'm sorry, Dave, but I can't do that: {}", repr(ex))
 
 if __name__=='__main__':
     from config import userInfo

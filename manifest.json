@@ -1,0 +1,8 @@
+{
+  "name": "CrawlerForIntOfBUPT",
+  "short_name": "CrawlerForIntOfBUPT",
+  "start_url": "/",
+  "display": "standalone",
+  "gcm_sender_id": "231121761920",
+  "gcm_user_visible_only": true
+}
